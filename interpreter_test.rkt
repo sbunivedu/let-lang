@@ -30,11 +30,11 @@
 ; define multiline string with #<< and a delim­iter name.
 (check-equal?
  (run
-  #<<LET
+"
 let x = 33
 in let y = 22
    in if zero?(-(x, 11)) then -(y, 2) else -(y, 4)
-LET
+"
   )
  (num-val 18))
 
@@ -44,23 +44,23 @@ LET
 
 (check-equal?
  (run
-  #<<LET
+"
 let z = 5
 in let x = 3
    in let y = -(x, 1)
       in let x = 4 in -(z, -(x, y))
-LET
+"
   )
  (num-val 3))
 
 (check-equal?
  (run
-  #<<LET
+"
 let x = 7
 in let y = 2
    in let y = let x = -(x, 1)
               in -(x, y)
       in -(-(x, 8), y)
-LET
+"
   )
  (num-val -5))
