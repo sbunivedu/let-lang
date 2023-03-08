@@ -1,7 +1,7 @@
 #lang racket
 
-(require "./interpreter.rkt")
 (require rackunit)
+(require "./interpreter.rkt")
 
 (check-equal?
  (run "5")

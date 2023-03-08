@@ -30,7 +30,7 @@ Expression  ::= Number
  if-exp
  let-exp
  ; parser
- parse)
+ scan&parse)
 
 (define scanner-spec
   '((number (digit (arbno digit)) number)
@@ -55,11 +55,11 @@ Expression  ::= Number
 
 (sllgen:make-define-datatypes scanner-spec grammar)
 
-(define parse
+(define scan&parse
   (sllgen:make-string-parser scanner-spec grammar))
 
 #|
-> (parse "-(55, -(x,11))")
+> (scan&parse "-(55, -(x,11))")
 #(struct:a-program
   #(struct:diff-exp
     #(struct:const-exp 55)
