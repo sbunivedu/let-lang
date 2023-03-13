@@ -28,3 +28,13 @@
 (check-equal?
  (scan&parse "let n=10 in -(n, 1)")
  (a-program (let-exp 'n (const-exp 10) (diff-exp (var-exp 'n) (const-exp 1)))))
+
+(check-equal?
+ (scan&parse "proc (x) -(x, 1)")
+ (a-program (proc-exp 'x (diff-exp (var-exp 'x)
+                                   (const-exp 1)))))
+
+(check-equal?
+ (scan&parse "(f x)")
+ (a-program (call-exp (var-exp 'f)
+                      (var-exp 'x))))
