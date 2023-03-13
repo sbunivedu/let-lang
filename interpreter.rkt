@@ -60,7 +60,26 @@
                     (value-of exp3 env))))
       (let-exp (var exp1 body)
                (let ((val1 (value-of exp1 env)))
-                 (value-of body (extend-env var val1 env)))))))
+                 (value-of body (extend-env var val1 env))))
+      (proc-exp (var body)
+                (proc-val (procedure var body env)))
+      (call-exp (rator rand)
+              (let ((proc (expval->proc (value-of rator env)))
+                    (arg (value-of rand env)))
+                (apply-procedure proc arg))))))
+
+; Procedure ADT
+
+(define-datatype proc proc?
+  [procedure
+   (var symbol?)
+   (body expression?)
+   (saved-env env?)])
+
+(define (apply-procedure proc1 val)
+  (cases proc proc1
+    [procedure (var body saved-env)
+               (value-of body (extend-env var val saved-env))]))
 
 ; Values
 ;
@@ -72,7 +91,8 @@
   (num-val
    (n number?))
   (bool-val
-   (b boolean?)))
+   (b boolean?))
+  (proc-val (p proc?)))
 
 ; extractors:
 
@@ -89,6 +109,11 @@
   (cases expval val
     (bool-val (b) b)
     (else (eopl:error 'expval->bool "Not a boolean: ~s" val))))
+
+(define (expval->proc val)
+  (cases expval val
+    (proc-val (p) p)
+    (else (eopl:error 'expval->proc "Not a procedure: ~s" val))))
 
 ; A nice REPL for interactive use
 (define read-eval-print

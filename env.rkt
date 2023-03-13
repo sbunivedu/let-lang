@@ -1,23 +1,41 @@
-#lang racket
+#lang eopl
 
 (provide
  ; build
  empty-env
  extend-env
  ; query
- apply-env)
+ env?
+ apply-env
+ 
+ identifier? identifier=?)
 
-; an example of a data type built without define-datatype
+(define-datatype env env?
+  (empty)
+  (extend
+   (var identifier?)
+   (val any?)
+   (saved-env env?)))
+
 (define (empty-env)
-  '())
+  (empty))
 
 (define (extend-env var val env)
-  (cons (cons var val) env))
+  (extend var val env))
 
-(define (apply-env env search-var)
-  (if (null? env)
-      (error 'apply-env "No binding for ~s" search-var)
-      (let ([saved-var (caar env)])
-        (if (symbol=? search-var saved-var)
-            (cdar env)
-            (apply-env (cdr env) search-var)))))
+(define (apply-env env1 search-var)
+  (cases env env1
+    (empty ()
+           (eopl:error 'apply-env "No binding for ~s" search-var))
+
+    (extend (saved-var saved-val saved-env)
+            (if (identifier=? search-var saved-var)
+                saved-val
+                (apply-env saved-env search-var)))))
+
+
+(define identifier? symbol?)
+
+(define identifier=? eq?)
+
+(define (any? v) #t)

@@ -16,6 +16,9 @@ Expression  ::= Number
                 [var-exp (var)]
             ::= let identifier = Expression in Expression
                 [let-exp (var exp1 body)]
+            ::= proc (Identifier) Expression
+                []
+            ::= (Expression Expression)
 |#
 
 (provide
@@ -23,12 +26,15 @@ Expression  ::= Number
  program
  a-program
  expression
+ expression?
  const-exp
  var-exp
  diff-exp
  zero?-exp
  if-exp
  let-exp
+ proc-exp
+ call-exp
  ; parser
  scan&parse)
 
@@ -51,7 +57,12 @@ Expression  ::= Number
     (expression ("if" expression "then" expression "else" expression)
                 if-exp)
     (expression ("let" identifier "=" expression "in" expression)
-                let-exp)))
+                let-exp)
+    (expression ("proc" "(" identifier ")" expression)
+                proc-exp)
+    (expression ("(" expression expression ")")
+                call-exp)))
+
 
 (sllgen:make-define-datatypes scanner-spec grammar)
 
