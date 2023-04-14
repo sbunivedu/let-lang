@@ -19,6 +19,10 @@ Expression  ::= Number
                 [var-exp (var)]
             ::= let identifier = Expression in Expression
                 [let-exp (var exp1 body)]
+            ::= proc (identifier) Expression
+                [proc-exp (var body)]
+            ::= (Expression Expression)
+                [call-exp (ractor rand)]
 ```
 
 Example programs:

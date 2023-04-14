@@ -30,7 +30,7 @@
 ; define multiline string with #<< and a delim­iter name.
 (check-equal?
  (run
-"
+  "
 let x = 33
 in let y = 22
    in if zero?(-(x, 11)) then -(y, 2) else -(y, 4)
@@ -44,7 +44,7 @@ in let y = 22
 
 (check-equal?
  (run
-"
+  "
 let z = 5
 in let x = 3
    in let y = -(x, 1)
@@ -55,7 +55,7 @@ in let x = 3
 
 (check-equal?
  (run
-"
+  "
 let x = 7
 in let y = 2
    in let y = let x = -(x, 1)
@@ -68,7 +68,7 @@ in let y = 2
 
 (check-equal?
  (run
-#<<CODE
+  #<<CODE
 let f = proc (x) -(x, 11)
 in (f (f 77))
 CODE
@@ -77,7 +77,7 @@ CODE
 
 (check-equal?
  (run
-#<<CODE
+  #<<CODE
 (proc (f) (f (f 77))
  proc (x) -(x, 11))
 CODE
@@ -86,7 +86,7 @@ CODE
 
 (check-equal?
  (run
-#<<CODE
+  #<<CODE
 let x = 200
 in let f = proc (z) -(z, x)
    in let x = 100
