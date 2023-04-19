@@ -18,6 +18,8 @@ Expression  ::= Number
                 [let-exp (var exp1 body)]
             ::= proc (Identifier) Expression
                 [proc-exp (var body)]
+            ::= letrec Identifier (Identifier) = Expression in Expression
+                [letrec-exp (proc-name bound-var proc-body letrec-body)]
             ::= (Expression Expression)
                 [call-exp (ractor rand)]
 |#
@@ -35,6 +37,7 @@ Expression  ::= Number
  if-exp
  let-exp
  proc-exp
+ letrec-exp
  call-exp
  ; parser
  scan&parse)
@@ -61,6 +64,8 @@ Expression  ::= Number
                 let-exp)
     (expression ("proc" "(" identifier ")" expression)
                 proc-exp)
+    (expression ("letrec" identifier "(" identifier ")" "=" expression "in" expression)
+                letrec-exp)
     (expression ("(" expression expression ")")
                 call-exp)))
 

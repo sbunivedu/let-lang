@@ -95,3 +95,14 @@ in let f = proc (z) -(z, x)
 CODE
   )
  (num-val -100))
+
+(check-equal?
+ (run
+  #<<CODE
+letrec double(x) = if zero?(x)
+                   then 0
+                   else -((double -(x, 1)), -(0, 2))
+in (double 6)
+CODE
+  )
+ (num-val 12))

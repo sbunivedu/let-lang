@@ -41,7 +41,7 @@
       (const-exp (n)
                  (num-val n))
       (var-exp (var)
-               (apply-env env var))
+               (apply-env env var construct-proc-val))
       (diff-exp (exp1 exp2)
                 (let ((val1 (value-of exp1 env))
                       (val2 (value-of exp2 env)))
@@ -63,10 +63,15 @@
                  (value-of body (extend-env var val1 env))))
       (proc-exp (var body)
                 (proc-val (procedure var body env)))
+      (letrec-exp (proc-name bound-var proc-body letrec-body)
+                (value-of letrec-body (extend-env-rec proc-name bound-var proc-body env)))
       (call-exp (rator rand)
               (let ((proc (expval->proc (value-of rator env)))
                     (arg (value-of rand env)))
                 (apply-procedure proc arg))))))
+
+(define (construct-proc-val var body saved-env)
+  (proc-val (procedure var body saved-env)))
 
 ; Procedure ADT
 
@@ -83,7 +88,7 @@
 
 ; Values
 ;
-; ExpVal = Int + Bool
+; ExpVal = Int + Bool + Proc
 ; DenVal = ExpVal
 
 ; an expressed value is either a number or a boolean.
