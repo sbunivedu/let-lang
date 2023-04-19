@@ -96,6 +96,8 @@ CODE
   )
  (num-val -100))
 
+; LETREC tests
+
 (check-equal?
  (run
   #<<CODE
@@ -106,3 +108,27 @@ in (double 6)
 CODE
   )
  (num-val 12))
+
+(check-equal?
+ (run
+  #<<CODE
+letrec sum(n) = if zero?(n)
+                then 0
+                else -(n, -(0, (sum -(n, 1))))
+in (sum 5)
+CODE
+  )
+ (num-val 15))
+
+(check-equal?
+ (run
+  #<<CODE
+let sum = 1
+in let n = 2
+   in letrec sum(n) = if zero?(n)
+                      then 0
+                      else -(n, -(0, (sum -(n, 1))))
+   in (sum 5)
+CODE
+  )
+ (num-val 15))

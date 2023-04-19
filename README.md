@@ -15,14 +15,16 @@ Expression  ::= Number
                 [zero?-exp (exp1)]
             ::= if Expression then Expression else Expression
                 [if-exp (exp1 exp2 exp3)]
-            ::= identifier
+            ::= Identifier
                 [var-exp (var)]
-            ::= let identifier = Expression in Expression
+            ::= let Identifier = Expression in Expression
                 [let-exp (var exp1 body)]
-            ::= proc (identifier) Expression
+            ::= letrec Identifier (Identifier) = Expression in Expression
+                [letrec-exp (proc-name bound-var proc-body letrec-body)]
+            ::= proc (Identifier) Expression
                 [proc-exp (var body)]
             ::= (Expression Expression)
-                [call-exp (ractor rand)]
+                [call-exp (rator rand)]
 ```
 
 Example programs:
@@ -51,6 +53,26 @@ in let y = 2
    in let y = let x = -(x,1)
               in -(x,y)
       in -(-(x,8), y)
+
+let add1 = proc (x) -(x,-1)
+in (add1 2)
+
+letrec double(x) = if zero?(x)
+                   then 0
+                   else -((double -(x, 1)), -(0, 2))
+in (double 6)
+
+letrec sum(n) = if zero?(n)
+                then 0
+                else -(n, -(0, (sum -(n, 1))))
+in (sum 5)
+
+let sum = 1
+in let n = 2
+   in letrec sum(n) = if zero?(n)
+                      then 0
+                      else -(n, -(0, (sum -(n, 1))))
+   in (sum 5)
 ```
 
 ## Syntax datatype
@@ -79,5 +101,13 @@ This implementation uses SLLGEN as a front end, which means that expressions wil
   (let-exp
    (var symbol?)
    (exp1 expression?)
-   (exp2 expression?)))
+   (exp2 expression?))
+  (proc-exp
+   (var symbol?)
+   (body expression?))
+  (letrec-exp
+   (proc-name symbol?)
+   (bound-var symbol?)
+   (proc-body expression?)
+   (letrec-body expression?))
 ```
