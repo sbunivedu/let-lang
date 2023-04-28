@@ -35,7 +35,7 @@
                                    (const-exp 1)))))
 
 (check-equal?
- (parse "letrec f(x) = a in b")
+ (scan&parse "letrec f(x) = a in b")
  (a-program (letrec-exp 'f
                         'x
                         (var-exp 'a)

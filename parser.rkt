@@ -39,6 +39,12 @@ Expression  ::= Number
  proc-exp
  letrec-exp
  call-exp
+
+ nameless-var-exp
+ nameless-let-exp
+ nameless-letrec-exp
+ nameless-proc-exp
+
  ; parser
  scan&parse)
 
@@ -67,8 +73,15 @@ Expression  ::= Number
     (expression ("letrec" identifier "(" identifier ")" "=" expression "in" expression)
                 letrec-exp)
     (expression ("(" expression expression ")")
-                call-exp)))
-
+                call-exp)
+    (expression ("%lexref" number)
+                nameless-var-exp)
+    (expression ("%let" expression "in" expression)
+                nameless-let-exp)
+    (expression ("%letrec" expression "in" expression)
+                nameless-letrec-exp)
+    (expression ("%lexproc" expression)
+                nameless-proc-exp)))
 
 (sllgen:make-define-datatypes scanner-spec grammar)
 

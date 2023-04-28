@@ -1,95 +1,14 @@
 #lang eopl
 
-(require "./env.rkt")
+(require "./nenv.rkt")
 (require "./parser.rkt")
+(require "./translator.rkt")
 
 (provide
  ; expressed Values
  num-val bool-val
  ; interpreter
  run)
-
-(define init-env
-  (lambda ()
-    (extend-env
-     'i (num-val 1)
-     (extend-env
-      'v (num-val 5)
-      (extend-env
-       'x (num-val 10)
-       (empty-env))))))
-
-; run : String -> ExpVal
-; Page: 71
-(define run
-  (lambda (string)
-    (value-of-program (scan&parse string))))
-
-; value-of-program : Program -> ExpVal
-; Page: 71
-(define value-of-program
-  (lambda (pgm)
-    (cases program pgm
-      (a-program (exp1)
-                 (value-of exp1 (init-env))))))
-
-; value-of : Exp * Env -> ExpVal
-; Page: 71
-(define value-of
-  (lambda (exp env)
-    (cases expression exp
-      (const-exp (n)
-                 (num-val n))
-      (var-exp (var)
-               (apply-env env var construct-proc-val))
-      (diff-exp (exp1 exp2)
-                (let ((val1 (value-of exp1 env))
-                      (val2 (value-of exp2 env)))
-                  (num-val
-                   (- (expval->num val1)
-                      (expval->num val2)))))
-      (zero?-exp (exp1)
-                 (let ((val1 (value-of exp1 env)))
-                   (if (zero? (expval->num val1))
-                       (bool-val #t)
-                       (bool-val #f))))
-      (if-exp (exp1 exp2 exp3)
-              (let ((val1 (value-of exp1 env)))
-                (if (expval->bool val1)
-                    (value-of exp2 env)
-                    (value-of exp3 env))))
-      (let-exp (var exp1 body)
-               (let ((val1 (value-of exp1 env)))
-                 (value-of body (extend-env var val1 env))))
-      (proc-exp (var body)
-                (proc-val (procedure var body env)))
-      (letrec-exp (proc-name bound-var proc-body letrec-body)
-                (value-of letrec-body (extend-env-rec proc-name bound-var proc-body env)))
-      (call-exp (rator rand)
-              (let ((proc (expval->proc (value-of rator env)))
-                    (arg (value-of rand env)))
-                (apply-procedure proc arg))))))
-
-(define (construct-proc-val var body saved-env)
-  (proc-val (procedure var body saved-env)))
-
-; Procedure ADT
-
-(define-datatype proc proc?
-  [procedure
-   (var symbol?)
-   (body expression?)
-   (saved-env env?)])
-
-(define (apply-procedure proc1 val)
-  (cases proc proc1
-    [procedure (var body saved-env)
-               (value-of body (extend-env var val saved-env))]))
-
-; Values
-;
-; ExpVal = Int + Bool + Proc
-; DenVal = ExpVal
 
 ; an expressed value is either a number or a boolean.
 (define-datatype expval expval?
@@ -98,6 +17,90 @@
   (bool-val
    (b boolean?))
   (proc-val (p proc?)))
+
+(define init-nenv
+  (extend-nenv
+   (num-val 1)
+   (extend-nenv
+    (num-val 5)
+    (extend-nenv
+     (num-val 10)
+     (empty-nenv)))))
+
+; run : String -> ExpVal
+; Page: 71
+(define run
+  (lambda (string)
+    (value-of-program (translate (scan&parse string)) init-nenv)))
+
+
+; value-of-program : Program -> ExpVal
+; Page: 71
+(define value-of-program
+  (lambda (pgm nenv)
+    (cases program pgm
+      (a-program (exp1)
+                 (value-of exp1 nenv)))))
+
+; value-of : Exp * Env -> ExpVal
+; Page: 71
+(define value-of
+  (lambda (exp nenv)
+    (cases expression exp
+      (const-exp (n)
+                 (num-val n))
+      (nameless-var-exp (n)
+               (apply-nenv nenv n construct-proc-val))
+      (diff-exp (exp1 exp2)
+                (let ((val1 (value-of exp1 nenv))
+                      (val2 (value-of exp2 nenv)))
+                  (num-val
+                   (- (expval->num val1)
+                      (expval->num val2)))))
+      (zero?-exp (exp1)
+                 (let ((val1 (value-of exp1 nenv)))
+                   (if (zero? (expval->num val1))
+                       (bool-val #t)
+                       (bool-val #f))))
+      (if-exp (exp1 exp2 exp3)
+              (let ((val1 (value-of exp1 nenv)))
+                (if (expval->bool val1)
+                    (value-of exp2 nenv)
+                    (value-of exp3 nenv))))
+      (nameless-let-exp (exp1 body)
+                        (let ([val1 (value-of exp1 nenv)])
+                          (value-of body (extend-nenv val1 nenv))))
+      (nameless-letrec-exp (proc-body letrec-body)
+                           (value-of letrec-body
+                                         (extend-nenv-rec proc-body nenv)))
+      (nameless-proc-exp (body)
+                         (proc-val (procedure body nenv)))
+      (call-exp (rator rand)
+              (let ((proc (expval->proc (value-of rator nenv)))
+                    (arg (value-of rand nenv)))
+                (apply-procedure proc arg)))
+      (else
+       (eopl:error 'value-of "Invalid translated expression")))))
+
+(define (construct-proc-val body saved-env)
+  (proc-val (procedure body saved-env)))
+
+; Procedure ADT
+
+(define-datatype proc proc?
+  [procedure
+   (body expression?)
+   (saved-env nenv?)])
+
+(define (apply-procedure proc1 val)
+  (cases proc proc1
+    [procedure (body saved-env)
+               (value-of body (extend-nenv val saved-env))]))
+
+; Values
+;
+; ExpVal = Int + Bool + Proc
+; DenVal = ExpVal
 
 ; extractors:
 
