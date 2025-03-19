@@ -1,8 +1,5 @@
 #lang eopl
 ; ------------------------------------------------------------------------------
-; Exercise 3.6
-
-; ------------------------------------------------------------------------------
 ; Scanner and parser specification
 
 (define scanner-spec
@@ -19,8 +16,7 @@
     (expression ("zero?" "(" expression ")") zero?-exp)
     (expression ("if" expression "then" expression "else" expression) if-exp)
     (expression (identifier) var-exp)
-    (expression ("let" identifier "=" expression "in" expression) let-exp)
-    (expression ("minus" "(" expression ")") minus-exp)))
+    (expression ("let" identifier "=" expression "in" expression) let-exp)))
 
 (sllgen:make-define-datatypes scanner-spec grammar)
 
@@ -139,11 +135,7 @@
         (apply-env env var))
       (let-exp (var exp1 body)
         (let ((val1 (value-of exp1 env)))
-          (value-of body (extend-env var val1 env))))
-      (minus-exp (exp1)
-        (let ((val1 (value-of exp1 env)))
-          (let ((num1 (expval->num val1)))
-            (num-val (- num1))))))))
+          (value-of body (extend-env var val1 env)))))))
 
 ; ------------------------------------------------------------------------------
 ; A nice REPL for interactive use
